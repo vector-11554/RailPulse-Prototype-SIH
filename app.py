@@ -23,6 +23,7 @@ def get_hourly_arrays(lat, lon, date_str):
         "end_date": date_str,
         "hourly": "temperature_2m,precipitation",
         "timezone": "Asia/Kolkata",
+        "past_days": 92
     }
     w_response = requests.get(weather_url, params=w_params, timeout=10)
     w_response.raise_for_status()
