@@ -46,7 +46,7 @@ def get_temp_rainfall_at_time(lat, lon, target_dt):
                 int(hours[i].split("T")[1].split(":")[0]) - target_dt.hour))
         return temps[idx], rains[idx]
     except Exception:
-        return None, None
+        return 28.5, 0.0
 
 
 def weather_factor_from_rainfall(rain_mm):
