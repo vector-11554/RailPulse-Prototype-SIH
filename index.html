@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RailPulse | Dynamic ETA</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #1A1818;
+            --bg-card: #221F1F;
+            --border-color: #3D3535;
+            --accent-primary: #A0342A;
+            --accent-hover: #b84338;
+            --text-main: #F4F1F0;
+            --text-muted: #A39B99;
+            --status-late: #D32F2F;
+            --status-early: #4CAF50;
+            --status-warn: #F57C00;
+            --font-display: 'Oswald', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background-color: var(--bg-base);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: baseline;
+            gap: 1.5rem;
+        }
+
+        .brand {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            letter-spacing: 0.02em;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .version-label {
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .live-clock-badge {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: #151313;
+            padding: 8px 14px;
+            border: 1px solid var(--border-color);
+            letter-spacing: 0.03em;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            width: 300px;
+        }
+
+        .search-container input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            padding: 10px 14px;
+            font-size: 0.95rem;
+            font-family: var(--font-sans);
+        }
+
+        .search-container input::placeholder {
+            color: #665D5C;
+        }
+
+        .search-container button {
+            background: var(--accent-primary);
+            color: #FFF;
+            border: none;
+            padding: 10px 18px;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.85rem;
+        }
+
+        .search-container button:hover {
+            background: var(--accent-hover);
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 2.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .landing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+            margin-top: 2rem;
+        }
+
+        .landing-text h1 {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .landing-text p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+            max-width: 90%;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .feat-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+            font-size: 1.05rem;
+        }
+
+        .feat-num {
+            font-family: var(--font-mono);
+            color: var(--accent-primary);
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: rgba(160, 52, 42, 0.15);
+            padding: 4px 8px;
+            border-radius: 2px;
+            border-left: 2px solid var(--accent-primary);
+        }
+
+        .landing-preview {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .preview-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        .mock-card {
+            border-left: 3px solid var(--accent-primary);
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .mock-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .mock-title {
+            font-weight: 600;
+        }
+
+        .mock-temp {
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .mock-table {
+            width: 100%;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            border-collapse: collapse;
+        }
+
+        .mock-table td {
+            padding: 4px 0;
+        }
+
+        .mock-table td:nth-child(2) {
+            color: var(--status-late);
+            text-align: right;
+        }
+
+        .hud-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            display: none;
+        }
+
+        .hud-top-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .route-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            background: rgba(160, 52, 42, 0.2);
+            border: 1px solid var(--accent-primary);
+            padding: 6px 14px;
+        }
+
+        .route-arrow {
+            color: var(--accent-hover);
+            font-size: 1.1rem;
+        }
+
+        .computed-time-badge {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .hud-main-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .train-name {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 4px;
+        }
+
+        .train-category {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+            letter-spacing: 0.05em;
+            font-family: var(--font-sans);
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-family: var(--font-mono);
+            font-weight: 500;
+        }
+
+        .timeline-header {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .station-row {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--border-color);
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1.5fr 2fr 1fr;
+            align-items: center;
+            margin-bottom: 12px;
+            transition: border-left-color 0.2s;
+        }
+
+        .station-row:hover {
+            border-left-color: var(--text-muted);
+        }
+
+        .station-row.is-current {
+            border: 1px solid rgba(160, 52, 42, 0.4);
+            border-left: 4px solid var(--accent-primary);
+            background-color: rgba(160, 52, 42, 0.06);
+            box-shadow: 0 0 20px rgba(160, 52, 42, 0.1);
+        }
+
+        .current-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.7rem;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(160, 52, 42, 0.8);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(160, 52, 42, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(160, 52, 42, 0);
+            }
+        }
+
+        .stn-name {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stn-dwell {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .timings-grid {
+            display: flex;
+            gap: 2rem;
+            background: var(--bg-base);
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .station-row.is-current .timings-grid {
+            border-color: rgba(160, 52, 42, 0.2);
+        }
+
+        .time-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .time-header {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .time-val {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .time-label {
+            font-size: 0.7rem;
+            color: #7A7271;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            width: 25px;
+            text-transform: uppercase;
+        }
+
+        .day-badge {
+            font-size: 0.65rem;
+            color: #7A7271;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            text-transform: uppercase;
+            margin-left: 2px;
+        }
+
+        .color-white {
+            color: var(--text-main);
+        }
+
+        .color-late {
+            color: var(--status-late);
+            font-weight: 600;
+        }
+
+        .color-early {
+            color: var(--status-early);
+        }
+
+        .color-warn {
+            color: var(--status-warn);
+        }
+
+        .weather-block {
+            text-align: right;
+        }
+
+        .weather-temp {
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: var(--font-mono);
+        }
+
+        .weather-cond {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .system-msg {
+            text-align: left;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            padding: 2rem 0;
+            display: none;
+        }
+
+        .error-msg {
+            background: rgba(211, 47, 47, 0.1);
+            border: 1px solid var(--status-late);
+            color: var(--status-late);
+            padding: 1rem;
+            display: none;
+            margin-bottom: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-left">
+            <div class="brand">RAILPULSE</div>
+            <span class="version-label">v0.1 — Prototype</span>
+        </div>
+        <div class="header-right">
+            <div class="live-clock-badge" id="liveClockBadge">-- --- ---- | --:--:-- IST</div>
+            <div class="search-container">
+                <input type="text" id="trainInput" placeholder="Enter Train No (e.g. 19484)"
+                    onkeypress="if(event.key === 'Enter') fetchForecast()">
+                <button onclick="fetchForecast()">Compute</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div id="landingState" class="landing-grid">
+            <div class="landing-text">
+                <h1>Dynamic Route Forecaster</h1>
+                <p>Combines live train tracking, real-time rainfall data, and official IR timetables to recompute
+                    arrival estimates as conditions change.</p>
+                <div class="feature-list">
+                    <div class="feat-item"><span class="feat-num">01</span> Live GPS Parsing</div>
+                    <div class="feat-item"><span class="feat-num">02</span> Weather Delay Formulation</div>
+                    <div class="feat-item"><span class="feat-num">03</span> Dynamic Time Recovery</div>
+                </div>
+            </div>
+
+            <div class="landing-preview">
+                <div class="preview-label">Live Data Structure Preview</div>
+                <div class="mock-card">
+                    <div class="mock-header">
+                        <span class="mock-title">Bhusaval Jn</span>
+                        <span class="mock-temp">28.4°C | Rain</span>
+                    </div>
+                    <table class="mock-table">
+                        <tr>
+                            <td>Scheduled Arrival</td>
+                            <td>14:30</td>
+                        </tr>
+                        <tr>
+                            <td>Dynamic Projection</td>
+                            <td>15:12</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="mock-card" style="border-left-color: var(--border-color); opacity: 0.7;">
+                    <div class="mock-header">
+                        <span class="mock-title">Jalgaon Jn</span>
+                        <span class="mock-temp">27.9°C | Clear</span>
+                    </div>
+                    <table class="mock-table">
+                        <tr>
+                            <td>Scheduled Arrival</td>
+                            <td>15:05</td>
+                        </tr>
+                        <tr>
+                            <td>Dynamic Projection</td>
+                            <td>15:38</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" class="system-msg">> Connecting to routing engine & Open-Meteo arrays...</div>
+        <div id="errorBox" class="error-msg"></div>
+
+        <div id="hud" class="hud-card">
+            <div class="hud-top-meta">
+                <div class="route-indicator">
+                    <span id="uiSourceStn">ORIGIN</span>
+                    <span class="route-arrow">➔</span>
+                    <span id="uiDestStn">DESTINATION</span>
+                </div>
+                <div class="computed-time-badge">
+                    <span>Generated: </span><span id="uiComputedAt"
+                        style="color: var(--text-main); font-weight: 600;">--</span>
+                </div>
+            </div>
+
+            <div class="hud-main-info">
+                <div>
+                    <div class="train-name" id="uiTrainName">--</div>
+                    <div class="train-category" id="uiTrainCategory">--</div>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div>
+                    <span class="metric-label">Total Live Delay</span>
+                    <span class="metric-value color-white" id="uiDelay">--</span>
+                </div>
+                <div>
+                    <span class="metric-label">Data Integration</span>
+                    <span class="metric-value color-white"
+                        style="font-size: 1.1rem; font-family: var(--font-sans);">RailRadar, Open-Meteo</span>
+                </div>
+                <div>
+                    <span class="metric-label">System Status</span>
+                    <span class="metric-value color-early"
+                        style="font-size: 1.1rem; font-family: var(--font-sans);">Engine Active</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="timelineSection" style="display: none;">
+            <div class="timeline-header">Route Timeline</div>
+            <div id="stationList"></div>
+        </div>
+    </main>
+
+    <script>
+        function updateLiveClock() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-IN', { hour12: false });
+            document.getElementById('liveClockBadge').textContent = `${dateStr} | ${timeStr} IST`;
+        }
+        setInterval(updateLiveClock, 1000);
+        updateLiveClock();
+
+        function interpretWeather(temp_c, rain_mm) {
+            if (temp_c === null || temp_c === undefined) return { temp: "N/A", cond: "Unchecked" };
+            let condition = "Clear / Cloudy";
+            if (rain_mm > 7.5) condition = "Heavy Rain (TSR Applied)";
+            else if (rain_mm > 2.5) condition = "Moderate Rain";
+            else if (rain_mm > 0) condition = "Light Rain";
+            else if (temp_c < 15) condition = "Mist / Cold";
+            return { temp: `${temp_c}°C`, cond: condition };
+        }
+
+        async function fetchForecast() {
+            const trainNumber = document.getElementById('trainInput').value.trim();
+            if (!trainNumber) return;
+
+            document.getElementById('landingState').style.display = 'none';
+            document.getElementById('errorBox').style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('timelineSection').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/api/forecast?train_number=${trainNumber}`);
+                const data = await response.json();
+
+                if (!response.ok || data.error) throw new Error(data.error || "Failed to route train data.");
+
+                document.getElementById('loading').style.display = 'none';
+
+                document.getElementById('uiTrainName').textContent = data.trainName;
+                document.getElementById('uiTrainCategory').textContent = data.category;
+                document.getElementById('uiSourceStn').textContent = data.sourceStation.toUpperCase();
+                document.getElementById('uiDestStn').textContent = data.destinationStation.toUpperCase();
+                document.getElementById('uiComputedAt').textContent = data.computedAt;
+
+                const delayEl = document.getElementById('uiDelay');
+                if (data.currentDelay > 0) {
+                    delayEl.textContent = `+${data.currentDelay} Mins`;
+                    delayEl.className = 'metric-value color-late';
+                } else if (data.currentDelay < 0) {
+                    delayEl.textContent = `${data.currentDelay} Mins (Early)`;
+                    delayEl.className = 'metric-value color-early';
+                } else {
+                    delayEl.textContent = "On Time";
+                    delayEl.className = 'metric-value color-early';
+                }
+
+                document.getElementById('hud').style.display = 'block';
+
+                const html = data.predictions.map(stn => {
+                    const weather = interpretWeather(stn.temp_c, stn.rain_mm);
+                    const condColor = weather.cond.includes("Heavy") ? "color-warn" : "";
+                    const arrColor = stn.delay_arr_min > 0 ? "color-late" : "color-early";
+                    const depColor = stn.delay_dep_min > 0 ? "color-late" : "color-early";
+
+                    const currentClass = stn.is_current ? "is-current" : "";
+                    const currentBadge = stn.is_current ? `<div class="current-indicator"><div class="pulse-dot"></div> ACTIVE TRACK / NEXT STOP</div>` : "";
+
+                    const expDepStr = stn.expected_departure === "--:--" ? "--:--" : `${stn.expected_departure} <span class="day-badge">Day ${stn.exp_day_dep}</span>`;
+                    const actDepStr = stn.actual_departure === "--:--" ? "--:--" : `${stn.actual_departure} <span class="day-badge">Day ${stn.act_day_dep}</span>`;
+
+                    return `
+                    <div class="station-row ${currentClass}">
+                        <div>
+                            ${currentBadge}
+                            <div class="stn-name">${stn.station}</div>
+                            <div class="stn-dwell">Halt Time: ${stn.dwell_min} min</div>
+                        </div>
+                        <div class="timings-grid">
+                            <div class="time-col">
+                                <span class="time-header">Timetable</span>
+                                <span class="time-val color-white"><span class="time-label">Arr</span>${stn.expected_arrival} <span class="day-badge">Day ${stn.exp_day_arr}</span></span>
+                                <span class="time-val color-white"><span class="time-label">Dep</span>${expDepStr}</span>
+                            </div>
+                            <div class="time-col">
+                                <span class="time-header">Dynamic</span>
+                                <span class="time-val ${arrColor}"><span class="time-label">Arr</span>${stn.actual_arrival} <span class="day-badge">Day ${stn.act_day_arr}</span></span>
+                                <span class="time-val ${depColor}"><span class="time-label">Dep</span>${actDepStr}</span>
+                            </div>
+                        </div>
+                        <div class="weather-block">
+                            <div class="weather-temp">${weather.temp}</div>
+                            <div class="weather-cond ${condColor}">${weather.cond}</div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+                document.getElementById('stationList').innerHTML = html;
+                document.getElementById('timelineSection').style.display = 'block';
+
+                setTimeout(() => {
+                    const activeStn = document.querySelector('.is-current');
+                    if (activeStn) activeStn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+
+            } catch (err) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('landingState').style.display = 'grid';
+                const errorBox = document.getElementById('errorBox');
+                errorBox.textContent = "ERR: " + err.message;
+                errorBox.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+
+</html>
