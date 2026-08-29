@@ -67,6 +67,8 @@ station-by-station along the route, combining:
 
 ## Setup
 
+Method 1 - 
+
 ### 1. Clone and install dependencies
 
 ```bash
@@ -114,6 +116,12 @@ enter a 5-digit train number, and click **Compute**.
 Returns train name, category, source/destination, current delay, and a
 station-by-station list of scheduled vs. dynamically predicted arrival and
 departure times, temperature, rainfall, and dwell time.
+
+Method 2 - 
+
+We deployed the website online and it calculates delay using weather but even after comprehensive fixes, soem glitches are there 
+
+link to the website - https://vector-11554.github.io/RailPulse-Prototype-SIH/
 
 ## Known Limitations
 
