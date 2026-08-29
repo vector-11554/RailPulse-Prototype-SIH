@@ -150,3 +150,9 @@ departure times, temperature, rainfall, and dwell time.
 ## Team
 
 Built by a first-year team at IIT Dharwad for Smart India Hackathon 2026.
+Lead - Aditya Biradar - ce26bt001@iitdh.ac.in
+Members - Varenya Maheshwari - ep26bt002@iitdh.ac.in
+          Jyotsna - cs26bt048@iitdh.ac.in
+          Tijil Sharma - cs26bt006@iitdh.ac.in
+          Hrushikesh Rao - ce26bt007@iitdh.ac.in
+          Saumay Jaiswal - ee26bt018@iitdh.ac.in
