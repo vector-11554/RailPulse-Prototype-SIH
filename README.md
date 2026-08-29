@@ -47,14 +47,14 @@ station-by-station along the route, combining:
 
 | Feature | Status |
 |---|---|
-| Live delay & running status | ✅ Working |
-| Real weather-based speed adjustment (temperature + rainfall) | ✅ Working |
-| Real dwell-time calculation from actual timestamps | ✅ Working |
-| Segment-by-segment speed factor from real timestamps | ✅ Working |
-| Multi-day journey day-offset display (Day 1 / Day 2 / Day 3) | ✅ Working |
-| Web dashboard (train number input → live forecast table) | ✅ Working |
-| Historical-pattern probability meter | 🔜 Roadmap (see below) |
-| Congestion / train-priority hierarchy | 🔜 Roadmap (see below) |
+| Live delay & running status |  Working |
+| Real weather-based speed adjustment (temperature + rainfall) |  Working |
+| Real dwell-time calculation from actual timestamps |  Working |
+| Segment-by-segment speed factor from real timestamps |  Working |
+| Multi-day journey day-offset display (Day 1 / Day 2 / Day 3) | Working |
+| Web dashboard (train number input → live forecast table) |  Working |
+| Historical-pattern probability meter |  Roadmap  |
+| Congestion / train-priority hierarchy |  Roadmap  |
 
 ## Tech Stack
 
