@@ -72,8 +72,8 @@ Method 1 -
 ### 1. Clone and install dependencies
 
 ```bash
-git clone <this-repo-url>
-cd railpulse
+git clone https://github.com/vector-11554/RailPulse-Prototype-SIH.git
+cd RailPulse-Prototype-SIH
 python3 -m venv venv
 source venv/bin/activate      # Windows: venv\Scripts\activate
 pip install flask flask-cors requests python-dotenv
